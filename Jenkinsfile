@@ -44,7 +44,7 @@ spec:
         visibleItemCount: 100,
         multiSelectDelimiter: ',',
         quoteValue: false,
-        value:'eureka-server,eureka-client'
+        value:'eureka-server,eureka-client',
         defaultValue: '',
         saveJSONParameterToFile: false
         )
