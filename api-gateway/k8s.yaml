@@ -41,5 +41,36 @@ spec:
               name: eureka
               key: eureka_server_address
         - name: JVM_OPTS
-          value: "-Xms512m -Xmx512m"       
+          value: "-Xms512m -Xmx512m" 
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-gateway
+spec:
+  selector:
+    app: api-gateway
+  ports:
+  - protocol: TCP
+    port: 9201
+    targetPort: 9201
+
+---
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: api-gateway
+spec:
+  rules:
+  - host: api-gateway.k8s.maimaiti.site
+    http:
+      paths:
+      - backend:
+          serviceName: api-gateway
+          servicePort: 9201
+        path: /
+      
       
