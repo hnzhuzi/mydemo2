@@ -44,7 +44,7 @@ spec:
         visibleItemCount: 100,
         multiSelectDelimiter: ',',
         quoteValue: false,
-        value:'eureka-server,eureka-client',
+        value:'eureka-server,eureka-client,user-service,api-gateway',
         defaultValue: '',
         saveJSONParameterToFile: false
         )
@@ -64,7 +64,7 @@ spec:
             }
         }
 
-        stage('eureka-server') {
+        stage('Deploy eureka-server') {
             when {
                 expression { return "$params.Module".contains('eureka-server')}
             }
