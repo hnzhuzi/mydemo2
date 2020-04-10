@@ -100,6 +100,42 @@ spec:
                 '''
             }
         }
+        stage('Deploy user-service') {
+            when {
+                expression { return "$params.Module".contains('user-service')}
+            }
+            steps {
+                sh '''
+                    cd user-service/
+                    mvn -Dmaven.test.skip=true clean package
+                    imageName=harbor.k8s.maimaiti.site/mydemo2/user-service:${BuildTag}
+                    docker build -t $imageName .
+                    docker push $imageName
+                    docker rmi $imageName
+                    sed -i "s/<BUILD_TAG>/${BuildTag}/" k8s.yaml
+                    kubectl --kubeconfig=/app/.kube/config -n kube-system apply -f k8s.yaml --record
+                    kubectl --kubeconfig=/app/.kube/config -n kube-system rollout status deployment user-service
+                '''
+            }
+        }
+        stage('Deploy api-gateway') {
+            when {
+                expression { return "$params.Module".contains('api-gateway')}
+            }
+            steps {
+                sh '''
+                    cd api-gateway/
+                    mvn -Dmaven.test.skip=true clean package
+                    imageName=harbor.k8s.maimaiti.site/mydemo2/api-gateway:${BuildTag}
+                    docker build -t $imageName .
+                    docker push $imageName
+                    docker rmi $imageName
+                    sed -i "s/<BUILD_TAG>/${BuildTag}/" k8s.yaml
+                    kubectl --kubeconfig=/app/.kube/config -n kube-system apply -f k8s.yaml --record
+                    kubectl --kubeconfig=/app/.kube/config -n kube-system rollout status deployment api-gateway
+                '''
+            }
+        }
     }
 }
 

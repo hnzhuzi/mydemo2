@@ -1,36 +1,36 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: eureka-client
+  name: user-service
 spec:
   replicas: 2
   selector:                                                                                                                   
     matchLabels:                                                                                                              
-      app: eureka-client
+      app: user-service
   template:
     metadata:
       labels:
-        app: eureka-client
+        app: user-service
     spec:
       containers:
-      - name: eureka-client
-        image: harbor.k8s.maimaiti.site/mydemo2/eureka-client:<BUILD_TAG>
+      - name: user-service
+        image: harbor.k8s.maimaiti.site/mydemo2/user-service:<BUILD_TAG>
         ports:
-        - containerPort: 8101
+        - containerPort: 8201
         resources:
           requests:
             memory: 512Mi
         # livenessProbe:
         #   httpGet:
         #     path: /
-        #     port: 8101
+        #     port: 8201
         #   initialDelaySeconds: 20
         #   periodSeconds: 10
         #   timeoutSeconds: 5
         # readinessProbe:
         #   httpGet:
         #     path: /
-        #     port: 8101
+        #     port: 8201
         #   initialDelaySeconds: 20
         #   periodSeconds: 10
         #   timeoutSeconds: 5
