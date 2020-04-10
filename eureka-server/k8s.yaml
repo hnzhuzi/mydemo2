@@ -1,0 +1,120 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: eureka
+data:
+  eureka_server_address: http://eureka-0.eureka-service-internal.kube-system.svc.cluster.local:8761/eureka/,http://eureka-1.eureka-service-internal.kube-system.svc.cluster.local:8761/eureka/,http://eureka-2.eureka-service-internal.kube-system.svc.cluster.local:8761/eureka/
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: eureka-service-internal
+spec:
+  clusterIP: None
+  selector:
+    app: eureka
+  ports:
+  - protocol: TCP
+    port: 8761
+    targetPort: 8761
+
+---
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: eureka
+spec:
+  podManagementPolicy: Parallel
+  replicas: 3
+  selector:                                                                                                                   
+    matchLabels:                                                                                                              
+      app: eureka
+  serviceName: eureka-service-internal
+  template:
+    metadata:
+      labels:
+        app: eureka
+    spec:
+      containers:
+      - name: eureka
+        image:  harbor.k8s.maimaiti.site/library/jenkins-demo-springcloud-eureka-server:<BUILD_TAG>
+        ports:
+        - name: server
+          containerPort: 8761
+        - name: management
+          containerPort: 8082
+        resources:
+          requests:
+            memory: 512Mi
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8082
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8082
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+        env:
+        # - name: MY_POD_NAME
+        #   valueFrom:
+        #     fieldRef:
+        #       fieldPath: metadata.name
+        # - name: EUREKA_REPLICAS
+        #   value: "3"
+        # - name: APP_OPTS
+        #   value: "
+        #           --spring.application.name=${APP_NAME}
+        #           --eureka.instance.hostname=${POD_NAME}.${APP_NAME}
+        #           --registerWithEureka=true
+        #           --fetchRegistry=true
+        #           --eureka.instance.preferIpAddress=false
+        #           --eureka.client.serviceUrl.defaultZone=http://eureka-0.${APP_NAME}:8080/eureka/,http://eureka-1.${APP_NAME}:8080/eureka/,http://eureka-2.${APP_NAME}:8080/eureka/
+        #           "
+        - name: EUREKA_SERVER_ADDRESS
+          valueFrom:
+            configMapKeyRef:
+              name: eureka
+              key: eureka_server_address
+        - name: ENVIRONMENT
+          value: "prod"
+        - name: JVM_OPTS
+          value: "-Xms512m -Xmx512m"
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: eureka
+spec:
+  selector:
+    app: eureka
+  ports:
+  - protocol: TCP
+    port: 8761
+    targetPort: 8761
+
+---
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: eureka
+spec:
+  rules:
+  - host: eureka.k8s.maimaiti.site
+    http:
+      paths:
+      - backend:
+          serviceName: eureka
+          servicePort: 8761
+        path: /

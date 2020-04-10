@@ -1,0 +1,45 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: eureka-client
+spec:
+  replicas: 2
+  selector:                                                                                                                   
+    matchLabels:                                                                                                              
+      app: eureka-client
+  template:
+    metadata:
+      labels:
+        app: eureka-client
+    spec:
+      containers:
+      - name: eureka-client
+        image: harbor.k8s.maimaiti.site/library/jenkins-demo-springcloud-eureka-client:<BUILD_TAG>
+        ports:
+        - containerPort: 8101
+        resources:
+          requests:
+            memory: 512Mi
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8101
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8101
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+        env:
+        - name: EUREKA_SERVER_ADDRESS
+          valueFrom:
+            configMapKeyRef:
+              name: eureka
+              key: eureka_server_address
+        - name: JVM_OPTS
+          value: "-Xms512m -Xmx512m"       
+      

@@ -1,0 +1,6 @@
+eureka:
+  instance:
+    hostname: "${HOSTNAME}.eureka-service-internal.kube-system.svc.cluster.local"
+  client:
+    serviceUrl:
+      defaultZone: ${EUREKA_SERVER_ADDRESS}
