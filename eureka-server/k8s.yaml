@@ -40,7 +40,7 @@ spec:
     spec:
       containers:
       - name: eureka
-        image:  harbor.k8s.maimaiti.site/library/jenkins-demo-springcloud-eureka-server:<BUILD_TAG>
+        image:  harbor.k8s.maimaiti.site/mydemo2/eureka-server:<BUILD_TAG>
         ports:
         - name: server
           containerPort: 8761
