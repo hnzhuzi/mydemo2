@@ -10,3 +10,8 @@ eureka:
     service-url:
       # defaultZone: http://localhost:8001/eureka/ #配置注册中心地址
       defaultZone: ${EUREKA_SERVER_ADDRESS} #配置注册中心地址
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.cloud.client.ipaddress}:${spring.application.name}:${server.port}
+    hostname: ${spring.cloud.client.ipaddress}
+    
