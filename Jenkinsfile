@@ -44,7 +44,7 @@ spec:
         visibleItemCount: 100,
         multiSelectDelimiter: ',',
         quoteValue: false,
-        value:'eureka-server,eureka-client,user-service,api-gateway',
+        value:'eureka-server,eureka-client,user-service,api-gateway,zuul-proxy',
         defaultValue: '',
         saveJSONParameterToFile: false
         )
@@ -136,6 +136,25 @@ spec:
                 '''
             }
         }
+        stage('Deploy zuul-proxy') {
+            when {
+                expression { return "$params.Module".contains('zuul-proxy')}
+            }
+            steps {
+                sh '''
+                    cd zuul-proxy/
+                    mvn -Dmaven.test.skip=true clean package
+                    imageName=harbor.k8s.maimaiti.site/mydemo2/zuul-proxy:${BuildTag}
+                    docker build -t $imageName .
+                    docker push $imageName
+                    docker rmi $imageName
+                    sed -i "s/<BUILD_TAG>/${BuildTag}/" k8s.yaml
+                    kubectl --kubeconfig=/app/.kube/config -n kube-system apply -f k8s.yaml --record
+                    kubectl --kubeconfig=/app/.kube/config -n kube-system rollout status deployment zuul-proxy
+                '''
+            }
+        }
+
     }
 }
 
